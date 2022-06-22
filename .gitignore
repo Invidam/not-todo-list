@@ -1,0 +1,6 @@
+#db prvate
+src/main/resources/mybatis/config.properties
+
+
+#JWT prvate
+src/main/java/auth/JWTTOKEN.java
