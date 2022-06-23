@@ -19,7 +19,6 @@
     <context:component-scan base-package="auth"/>
     <context:component-scan base-package="service" />
     <context:component-scan base-package="repository" />
-    <context:component-scan base-package="controller"/>
     <!--    <aop:aspectj-autoproxy/>-->
     <!--    다음 주에서 배울 예정-->
     <!--    JSP라는 웹페이지를 반환하겠다.-->

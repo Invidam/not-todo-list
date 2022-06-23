@@ -1,5 +1,6 @@
 package repository;
 
+import DTO.LoginUserDTO;
 import domain.User;
 import org.springframework.stereotype.Repository;
 
@@ -9,5 +10,5 @@ public interface UserMapper {
     User getUserById(Long id);
     void updateUser(User user);
     void withdrawUser(Long id);
-    User getUserInLogin(User user);
+    User getUserInLogin(LoginUserDTO loginUserDTO);
 }

@@ -10,6 +10,7 @@ public class User {
     private String nickname;
     private LocalDateTime createdAt;
     private boolean isDeleted;
+    private String refreshToken;
 
 
     public Long getId() {
@@ -28,6 +29,8 @@ public class User {
         return this.isDeleted;
     }
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public String getRefreshToken() {return refreshToken;}
+
 
     public void setId(Long id) {
         this.id = id;
@@ -45,5 +48,6 @@ public class User {
         this.isDeleted = isDeleted;
     }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setRefreshToken(String refreshToken) {this.refreshToken = refreshToken;}
 
 }

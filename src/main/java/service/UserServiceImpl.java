@@ -1,6 +1,8 @@
 package service;
 
-import auth.JWTTOKEN;
+import DTO.LoginUserDTO;
+import DTO.TokenDTO;
+import auth.JwtToken;
 import domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,12 +11,12 @@ import repository.UserMapper;
 @Service
 public class UserServiceImpl implements UserService{
 
-    private final JWTTOKEN jwttoken;
+    private final JwtToken jwttoken;
 
     @Autowired
     private UserMapper userMapper;
 
-    public UserServiceImpl(JWTTOKEN jwttoken) {
+    public UserServiceImpl(JwtToken jwttoken) {
         this.jwttoken = jwttoken;
     }
 
@@ -48,20 +50,5 @@ public class UserServiceImpl implements UserService{
             e.printStackTrace();
         }
     }
-    @Override
-    public String login(User user) {
-        System.out.println(user.getAccount() +  user.getPassword());
-        User loggedInUser = userMapper.getUserInLogin(user);
-        System.out.println(loggedInUser.getId());
-        return jwttoken.create(loggedInUser);
-    }
 
-    @Override
-    public User verify(String token) {
-        return jwttoken.verify(token);
-    }
-    @Override
-    public User logout(String token) {
-        return jwttoken.verify(token);
-    }
 }

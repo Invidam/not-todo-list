@@ -1,5 +1,7 @@
 package service;
 
+import DTO.LoginUserDTO;
+import DTO.TokenDTO;
 import domain.User;
 
 public interface UserService {
@@ -8,7 +10,4 @@ public interface UserService {
     void updateUser(User user);
     void withdrawUser(long id);
 
-    String login(User user);
-    User verify(String token);
-    User logout(String token);
 }

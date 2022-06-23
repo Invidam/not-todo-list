@@ -18,7 +18,7 @@
         SELECT id, account, password,nickname,created_at,is_deleted FROM user WHERE id=#{id}
     </select>
 
-    <select id="getUserInLogin" parameterType="domain.User" resultMap="UserResultMap">
+    <select id="getUserInLogin" parameterType="DTO.LoginUserDTO" resultMap="UserResultMap">
         SELECT id, account, password,nickname,created_at,is_deleted FROM user WHERE account = #{account} and password = #{password}
     </select>
     <update id="updateUser" parameterType="domain.User">
@@ -28,7 +28,6 @@
     <update id="withdrawUser" parameterType="Long">
         UPDATE user SET is_deleted = true WHERE id =#{id}
     </update>
-
 
     <delete id="deleteUserById" parameterType="Long">
         DELETE FROM user WHERE id=#{id}

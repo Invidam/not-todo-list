@@ -1,65 +1,44 @@
 package controller;
 
 
+import DTO.LoginUserDTO;
+import DTO.TokenDTO;
 import domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import service.UserService;
+import service.AuthService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-@Controller
+@RestController
 @RequestMapping("")
 public class AuthController {
 
-
-    private final UserService userService;
-
+    private final AuthService authService;
 
     @Autowired
-    public AuthController(UserService userService) {
-        this.userService = userService;
-    }
-
-    @RequestMapping(value="/signup", method = RequestMethod.GET)
-    public String signup() {
-        System.out.println("signyp star");
-        return "/auth/signup";
-    }
-    @RequestMapping(value="/signup", method = RequestMethod.POST)
-    public String createUser(User user) {
-        System.out.println(user.getAccount());
-        userService.createUser(user);
-        return "index";
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
 
-    @RequestMapping(value="/login", method = RequestMethod.GET)
-    public String login() {
-        System.out.println("login star");
-        return "/auth/login";
-    }
+
+//    @RequestMapping(value="/login", method = RequestMethod.GET)
+//    public String login() {
+//        System.out.println("login star");
+//        return "/auth/login";
+//    }
     @RequestMapping(value="/login", method = RequestMethod.POST)
-    public String loginUser(User user, HttpSession session) {
-        String token = userService.login(user);
-        if(token != null) {
-            session.setAttribute("token",token );
-            session.setAttribute("UserAccount",user.getAccount());
-        }
-        return "index";
-
+    public TokenDTO loginUser(@RequestBody LoginUserDTO loginUserDTO) {
+        return authService.login(loginUserDTO);
     }
 
-    @RequestMapping(value="/info", method = RequestMethod.GET)
-    public String userInfo(HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        String token = (String)session.getAttribute("token");
-        User user = userService.verify(token);
-        System.out.println("session UserAccount: " + session.getAttribute("UserAccount"));
-        System.out.println("USER ID: "+ user.getId());
-        return "index";
+    @RequestMapping(value="/auth/refresh", method = RequestMethod.GET)
+    public TokenDTO refreshToken(@RequestHeader("x-jwt-refresh-token") String refreshToken) {
+
+        return authService.refreshToken(new TokenDTO(null,refreshToken));
     }
     @RequestMapping(value="/logout", method = RequestMethod.GET)
     public String logoutUser(HttpSession session) {
