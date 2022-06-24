@@ -1,6 +1,6 @@
 package domain;
 
-import java.time.LocalDateTime;
+import java.sql.Date;
 
 public class User {
 
@@ -8,7 +8,7 @@ public class User {
     private String account;
     private String password;
     private String nickname;
-    private LocalDateTime createdAt;
+    private Date createdAt;
     private boolean isDeleted;
     private String refreshToken;
 
@@ -28,7 +28,7 @@ public class User {
     public boolean getIsDeleted() {
         return this.isDeleted;
     }
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public Date getCreatedAt() { return createdAt; }
     public String getRefreshToken() {return refreshToken;}
 
 
@@ -47,7 +47,7 @@ public class User {
     public void setIsDeleted(boolean isDeleted) {
         this.isDeleted = isDeleted;
     }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
     public void setRefreshToken(String refreshToken) {this.refreshToken = refreshToken;}
 
 }

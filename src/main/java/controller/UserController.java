@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-@Controller
+@RestController
 @RequestMapping("")
 public class UserController {
 
@@ -36,34 +36,32 @@ public class UserController {
 
     @RequestMapping(value="/user/{id}", method = RequestMethod.GET)
     public User getUserById(@PathVariable long id) {
-        User user = userService.getUserById(id);
-        return user;
+        return userService.getUserById(id);
 //        return "/index.jsp";
     }
 
     @RequestMapping(value="/user", method = RequestMethod.PUT)
-    public String updateUser(User user, HttpServletResponse response) {
+    public User updateUser(@RequestBody User user, HttpServletResponse response) {
 
         userService.updateUser(user);
         System.out.println("UPDATE USER: "+ user.getAccount());
-        return "/user/profile";
+        return user;
     }
 
     @DeleteMapping("/user/{id}")
-    public ModelAndView withdrawUser(@PathVariable long id) {
+    public String withdrawUser(@PathVariable long id) {
         userService.withdrawUser(id);
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("index.jsp");
-        return modelAndView;
+        return "comp";
     }
-    @RequestMapping(value="/signup", method = RequestMethod.GET)
-    public String signup() {
-        System.out.println("signyp star");
-        return "/auth/signup";
-    }
+//    @RequestMapping(value="/signup", method = RequestMethod.GET)
+//    public String signup() {
+//        System.out.println("signyp star");
+//        return "/auth/signup";
+//    }
     @RequestMapping(value="/signup", method = RequestMethod.POST)
-    public String createUser(User user) {
+    public String createUser(@RequestBody User user) {
         System.out.println(user.getAccount());
+        bcrtpt
         userService.createUser(user);
         return "index";
     }

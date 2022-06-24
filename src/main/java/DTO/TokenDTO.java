@@ -3,12 +3,17 @@ package DTO;
 public class TokenDTO {
 
     private String accessToken;
-    private String refreshToken;
 
+
+    private String refreshToken;
+    public final String tokenType = "bearer";
     public String getAccessToken() {
         return accessToken;
     }
 
+    public String getTokenType() {
+        return tokenType;
+    }
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;

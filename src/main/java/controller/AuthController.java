@@ -35,11 +35,15 @@ public class AuthController {
         return authService.login(loginUserDTO);
     }
 
-    @RequestMapping(value="/auth/refresh", method = RequestMethod.GET)
-    public TokenDTO refreshToken(@RequestHeader("x-jwt-refresh-token") String refreshToken) {
+    @RequestMapping(value="/auth/refresh", method = RequestMethod.POST)
+    public TokenDTO refreshToken(@RequestBody TokenDTO tokenDTO) {
 
-        return authService.refreshToken(new TokenDTO(null,refreshToken));
+        return authService.refreshToken(tokenDTO);
     }
+    /*
+    * @RequestHeader("Authorization") 으로 받은 Accesstoken 처리하기
+    * Bearere ${ACcess token } 꼴임.
+    * */
     @RequestMapping(value="/logout", method = RequestMethod.GET)
     public String logoutUser(HttpSession session) {
         session.removeAttribute("token");

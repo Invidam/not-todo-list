@@ -9,7 +9,7 @@
         <result property="password" column="password" />
         <result property="nickname" column="nickname" />
         <result property="isDeleted" column="is_deleted" />
-<!--        <result propertyyyyyhhhhhhhhh="createdAt" column="created_at" />-->
+        <result property="createdAt" column="created_at" />
     </resultMap>
     <insert id="createUser" parameterType="domain.User">
         INSERT INTO user (account, password,nickname,created_at,is_deleted) VALUES(#{account},#{password},#{nickname},now(),#{isDeleted})

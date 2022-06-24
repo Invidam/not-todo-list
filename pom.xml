@@ -47,6 +47,11 @@
             <version>4.3.18.RELEASE</version>
         </dependency>
 
+<!--        <dependency>-->
+<!--            <groupId>org.springframework</groupId>-->
+<!--            <artifactId>spring-jdbc</artifactId>-->
+<!--            <version>4.3.18.RELEASE</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>
