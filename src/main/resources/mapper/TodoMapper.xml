@@ -25,11 +25,7 @@
         <result property="isEdited" column="is_edited" />
         <result property="isShared" column="is_shared" />
         <result property="isDeleted" column="is_deleted" />
-        <result property="account" column="account" />
-        <result property="password" column="password" />
-        <result property="nickname" column="nickname" />
-        <result property="isDeleted" column="is_deleted" />
-        <result property="createdAt" column="created_at" />
+        <collection property="owner" resultMap="UserInfoResultMap"/>
         <collection property="hashTagList" javaType="list" ofType="java.lang.String">
             <result column="hash_tags" />
         </collection>
@@ -47,6 +43,9 @@
         <select id="isExistHashTagRelationship" parameterType="DTO.Item.ItemIdAndHashTagIdDTO" resultType="boolean">
             SELECT IF(COUNT(*) != 0, 1, 0) FROM item_hash_tag WHERE hash_tag_id = #{hashTagId} and item_id = #{itemId}
         </select>
+        <select id="isExistItem" parameterType="long" resultType="boolean">
+            SELECT IF(COUNT(*) != 0, 1, 0) FROM item WHERE id=#{id} and (is_deleted = false or is_deleted is null)
+        </select>
         <insert id="createHashTag" parameterType="String">
             INSERT INTO hash_tag (hash_tag_name) VALUES(#{hashTag})
         </insert>
@@ -55,9 +54,9 @@
             INSERT INTO item_hash_tag (item_id, hash_tag_id) VALUES(#{itemId}, #{hashTagId})
         </insert>
 
-<!--        <select id="getItemIdByTitle" parameterType="String" resultType="long">-->
-<!--            SELECT id FROM item WHERE title = #{title}-->
-<!--        </select>-->
+        <select id="getItemOwnerIdById" parameterType="long" resultType="long">
+            SELECT user_id FROM item WHERE id = #{id}
+        </select>
 
         <insert id="createItem" parameterType="domain.Item">
             INSERT INTO item (user_id, title, priority, created_at, deadline, description, is_done) VALUES(#{userId}, #{title},#{priority},now(),#{deadline}, #{description}, 0)

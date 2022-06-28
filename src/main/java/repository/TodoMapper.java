@@ -11,7 +11,7 @@ public interface TodoMapper {
     String getHashTagById(long hashTagId);
     boolean isExistHashTag(String hashTag);
     boolean isExistHashTagRelationship(ItemIdAndHashTagIdDTO itemIdAndHashTagIdDTO);
-//    Board getBoardById(Long id);
+    boolean isExistItem(long id);
 //
     void createHashTag(String hashTag);
 //
@@ -19,7 +19,6 @@ public interface TodoMapper {
 //
 //    void deleteHashTagRelationShip(long id);
 //
-//    void deleteCommentByBoardId(long id);
 
 //    long getCategoryId(String category);
 //    long getHashTagId(String hashTag);
@@ -28,6 +27,7 @@ public interface TodoMapper {
     void createItem(Item item);
     ItemInfoDTO getItemInfoById(long id);
     void updateItem(Item item);
+    long getItemOwnerIdById(long id);
     void deleteItem(long id);
 }
 

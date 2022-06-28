@@ -46,8 +46,8 @@ public class UserServiceImpl implements UserService{
             throw new UsernameNotFoundException("Inputted Path's User is not exists.");
         return userMapper.getUserRepresentInfoById(id);
     }
-
-    private void checkUserById(long id, String accessToken) {
+    @Override
+    public void checkUserById(long id, String accessToken) {
         if(!userMapper.isExistUser(id))
             throw new UsernameNotFoundException("Inputted User is not exists.");
         if(id != jwtToken.verify(accessToken).getId())

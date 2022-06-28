@@ -5,6 +5,7 @@ import DTO.Item.ItemIdAndHashTagIdDTO;
 import DTO.Item.ItemInfoDTO;
 import auth.JwtToken;
 import domain.Item;
+import exception.item.ItemNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repository.TodoMapper;
@@ -16,48 +17,43 @@ public class TodoServiceImpl implements TodoService{
 
     @Autowired
     private final JwtToken jwtToken;
-
+    @Autowired
+    private final UserService userService;
     @Autowired
     private TodoMapper todoMapper;
 
-    public TodoServiceImpl(JwtToken jwtToken) {
+    public TodoServiceImpl(JwtToken jwtToken, UserService userService) {
         this.jwtToken = jwtToken;
+        this.userService = userService;
     }
 
-    @Override
-    public long findHashTagIdByName(String hashTag) {
+    private long findHashTagIdByName(String hashTag) {
         return todoMapper.findHashTagId(hashTag);
     }
 
-    @Override
-    public void createHashTag(String hashTag) {
+    private void createHashTag(String hashTag) {
         todoMapper.createHashTag(hashTag);
     }
 
-    @Override
-    public void createHashTagRelationship(ItemIdAndHashTagDTO itemIdAndHashTagDTO) {
+    private void createHashTagRelationship(ItemIdAndHashTagDTO itemIdAndHashTagDTO) {
         todoMapper.createHashTagsRelationship(new ItemIdAndHashTagIdDTO(itemIdAndHashTagDTO.getId(),findHashTagIdByName(itemIdAndHashTagDTO.getHashTag())));
     }
 
-    @Override
-    public void createItem(Item item) {
+    private void createItem(Item item) {
         todoMapper.createItem(item);
     }
 
-    @Override
-    public void makeHashTags(List<String> hashTagList) {
+    private void makeHashTags(List<String> hashTagList) {
         hashTagList.forEach(hashTag -> {
             if(!todoMapper.isExistHashTag(hashTag)) createHashTag(hashTag);
         });
     }
 
-    @Override
-    public void createHashTagsRelationship(long id, List<String> hashTagList) {
+    private void createHashTagsRelationship(long id, List<String> hashTagList) {
         hashTagList.forEach(hasTag -> createHashTagRelationship(new ItemIdAndHashTagDTO(id,hasTag)));
     }
 
-    @Override
-    public void updateHashTagsRelationship(long id, List<String> hashTagList) {
+    private void updateHashTagsRelationship(long id, List<String> hashTagList) {
         hashTagList.forEach(hashTag -> {
             ItemIdAndHashTagIdDTO itemIdAndHashTagIdDTO = new ItemIdAndHashTagIdDTO(id, todoMapper.findHashTagId(hashTag));
             if (!todoMapper.isExistHashTagRelationship(itemIdAndHashTagIdDTO))
@@ -68,34 +64,35 @@ public class TodoServiceImpl implements TodoService{
     @Override
     public void createItemFromInfo(ItemInfoDTO itemInfoDTO, String authHeader) {
         itemInfoDTO.setUserId(jwtToken.verify(jwtToken.getAccessTokenInHeader(authHeader)).getId());
-        makeHashTags(itemInfoDTO.getHashTagList());
         createItem(itemInfoDTO);
-        System.out.println("AFTER CRATE: TITLE: " + itemInfoDTO.getId());
+
+        makeHashTags(itemInfoDTO.getHashTagList());
         createHashTagsRelationship(itemInfoDTO.getId(), itemInfoDTO.getHashTagList());
     }
 
     @Override
     public ItemInfoDTO getItemById(long id) {
+        if(!todoMapper.isExistItem(id))
+            throw new ItemNotFoundException("Inputted Path's Item is not exists.");
         return todoMapper.getItemInfoById(id);
     }
 
-    @Override
-    public void updateItem(Item item) {
+    private void updateItem(Item item) {
         todoMapper.updateItem(item);
-        //title로 id를 얻으면 중복발생이 가능하다.
     }
 
     @Override
     public void updateItemFromInfo(ItemInfoDTO itemInfoDTO, String authHeader) {
-        itemInfoDTO.setUserId(jwtToken.verify(jwtToken.getAccessTokenInHeader(authHeader)).getId());
-        makeHashTags(itemInfoDTO.getHashTagList());
+        userService.checkUserById(itemInfoDTO.getId(),jwtToken.getAccessTokenInHeader(authHeader));
+
         updateItem(itemInfoDTO);
-        //이미 있으면 어떡할지 생각하기.
-        //user id , hashtag id, item id를 통해 확인해야 한다.
+
+        makeHashTags(itemInfoDTO.getHashTagList());
         updateHashTagsRelationship(itemInfoDTO.getId(), itemInfoDTO.getHashTagList());
     }
     @Override
-    public void deleteItem(long id) {
+    public void deleteItem(long id, String authHeader) {
+        userService.checkUserById(todoMapper.getItemOwnerIdById(id),jwtToken.getAccessTokenInHeader(authHeader));
         todoMapper.deleteItem(id);
     }
     /*
