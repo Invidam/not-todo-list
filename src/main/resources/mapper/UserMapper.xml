@@ -2,9 +2,18 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="repository.UserMapper">
-
+    <resultMap id="ItemResultMap" type="DTO.Item.ItemInUserDTO">
+        <id property="id" column="item_id"/>
+        <result property="title" column="item_title" />
+    </resultMap>
+        <resultMap id="UserRepresentResultMap" type="DTO.User.UserRepresentInfoDTO">
+        <id property="id" column="id" />
+        <result property="nickname" column="nickname" />
+        <result property="createdAt" column="created_at" />
+        <collection property="itemList" resultMap="ItemResultMap"/>
+    </resultMap>
     <resultMap id="UserResultMap" type="domain.User">
-        <result property="id" column="id" />
+        <id property="id" column="id" />
         <result property="account" column="account" />
         <result property="password" column="password" />
         <result property="nickname" column="nickname" />
@@ -13,23 +22,42 @@
     </resultMap>
     <insert id="createUser" parameterType="domain.User">
         INSERT INTO user (account, password,nickname,created_at,is_deleted) VALUES(#{account},#{password},#{nickname},now(),#{isDeleted})
+        <selectKey keyProperty="id" resultType="Long">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
     </insert>
-    <select id="getUserById" parameterType="Long" resultMap="UserResultMap">
+    <select id="getUserById" parameterType="long" resultMap="UserResultMap">
         SELECT id, account, password,nickname,created_at,is_deleted FROM user WHERE id=#{id}
     </select>
 
-    <select id="getUserInLogin" parameterType="DTO.LoginUserDTO" resultMap="UserResultMap">
-        SELECT id, account, password,nickname,created_at,is_deleted FROM user WHERE account = #{account} and password = #{password}
+    <select id="getUserByAccount" parameterType="String" resultMap="UserResultMap">
+        SELECT id, account, password,nickname,created_at,is_deleted FROM user WHERE account = #{account}
     </select>
     <update id="updateUser" parameterType="domain.User">
         UPDATE user SET account = #{account},  password = #{password},  nickname =#{nickname} WHERE id =#{id}
     </update>
 
-    <update id="withdrawUser" parameterType="Long">
+    <update id="withdrawUser" parameterType="long">
         UPDATE user SET is_deleted = true WHERE id =#{id}
     </update>
 
-    <delete id="deleteUserById" parameterType="Long">
+    <delete id="deleteUserById" parameterType="long">
         DELETE FROM user WHERE id=#{id}
     </delete>
+    <select id="isExistAccount" parameterType="String" resultType="boolean">
+        SELECT IF(COUNT(*) != 0, 1, 0) FROM user WHERE account = #{account}
+    </select>
+    <select id="isExistNickname" parameterType="String" resultType="boolean">
+        SELECT IF(COUNT(*) != 0, 1, 0) FROM user WHERE nickname = #{nickname}
+    </select>
+    <select id="isExistUser" parameterType="long" resultType="boolean">
+        SELECT IF(COUNT(*) != 0, 1, 0) FROM user WHERE id=#{id} and (is_deleted = false or is_deleted is null)
+    </select>
+    <select id="getUserRepresentInfoById" parameterType="long" resultMap="UserRepresentResultMap">
+        SELECT u.id, u.nickname, u.created_at, i.title as item_title , i.id as item_id FROM
+        (SELECT * FROM not_todo_list.user WHERE id = #{id}) u
+        LEFT JOIN item AS i ON i.user_id = u.id and (i.is_deleted = false or i.is_deleted is null)
+        ORDER BY i.created_at  DESC
+        LIMIT 10
+    </select>
 </mapper>

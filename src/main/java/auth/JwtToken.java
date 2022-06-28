@@ -1,39 +1,47 @@
 package auth;
 
-import DTO.TokenDTO;
+import DTO.Token.TokenDTO;
+import DTO.User.UserInfoDTO;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-@PropertySource("classpath:application.properties")
+
 @Component
 public class JwtToken {
 
-    @Value("${jwt.accessSecretKey:default}")
-    private String accessSecretKey;
-    @Value("${jwt.refreshSecretKey:default}")
-    private String refreshSecretKey;
+
+    private final String accessSecretKey;
+
+
+    private final String refreshSecretKey;
 
     private final int accessTokenValidTime = 1000 * 60 * 30; // 30m
     private final int refreshTokenValidTime = 1000 * 60 * 60 * 24 * 14; // 14d
 
     @Autowired
-    public JwtToken() {}
+    public JwtToken(@Value("${jwt.accessSecretKey}") String accessSecretKey,@Value("${jwt.refreshSecretKey}") String refreshSecretKey) {
+        this.accessSecretKey = accessSecretKey;
+        this.refreshSecretKey = refreshSecretKey;
+    }
+    public String getAccessTokenInHeader(String header) {
+        return header.substring(7);
+    }
     private Map<String, Object> makeHeader() {
 
         Map<String, Object> headerClaims = new HashMap<>();
-        headerClaims.put("alg", "HMCA256");
+        headerClaims.put("alg", "HS256");
         headerClaims.put("typ", "JWT");
 
         return headerClaims;
@@ -42,7 +50,7 @@ public class JwtToken {
 
         Map<String, String> payloadClaims  = new HashMap<>();
         if(isAccessToken) {
-            payloadClaims.put("account", user.getAccount());
+            payloadClaims.put("id", Long.toString(user.getId()));
             payloadClaims.put("nickname", user.getNickname());
         }
         else
@@ -50,44 +58,55 @@ public class JwtToken {
         return payloadClaims;
     }
     public String createToken(User user, boolean isAccessToken) {
-        return JWT.create().withIssuer("hspark").withExpiresAt(new Date((new Date().getTime() + (isAccessToken ? accessTokenValidTime : refreshTokenValidTime)))).withHeader(makeHeader()).withPayload(makePayload(user,isAccessToken)).sign(Algorithm.HMAC256(isAccessToken ? accessSecretKey : refreshSecretKey));
+        return JWT.create().withIssuer("hspark")
+                .withExpiresAt(new Date((new Date().getTime() + (isAccessToken ? accessTokenValidTime : refreshTokenValidTime))))
+                .withHeader(makeHeader())
+                .withPayload(makePayload(user,isAccessToken))
+                .sign(Algorithm.HMAC256(isAccessToken ? accessSecretKey : refreshSecretKey));
     }
-    public TokenDTO create(User user, boolean isOnlyAccess) {
+    public TokenDTO create(User user) {
         try {
-            return isOnlyAccess ? new TokenDTO(createToken(user,true),null) : new TokenDTO(createToken(user,true), createToken(user,false));
+            return new TokenDTO(createToken(user,true), createToken(user,false));
         }
         catch(JWTCreationException exception) {
-            throw exception;
+            //클레임에 오류가 있을 경우
+            exception.printStackTrace();
+            throw new JWTCreationException("In Create Token, Error appeared.",null);
         }
     }
-    private DecodedJWT verifyToken(String accessToken,String secretKey, int validTime) {
-        JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secretKey))
-                .withIssuer("hspark")
-                .acceptExpiresAt(validTime)
-                .build();
+    private DecodedJWT decodeToken(String token, String secretKey, int validTime) {
+        try {
+            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secretKey))
+                    .withIssuer("hspark")
+                    .build();
 
-        return verifier.verify(accessToken);
+            return verifier.verify(token);
+        }
+        catch(JWTDecodeException exception) {
+            exception.printStackTrace();
+            throw new JWTDecodeException("In Decode Token, Error appeared.",null);
+        }
+
     }
 
-    public boolean isValidAccessToken(TokenDTO tokenDTO) {
-        User user = new User();
+    public boolean isExpiredAccessToken(String accessToken) {
         try {
-            DecodedJWT jwt = verifyToken(tokenDTO.getAccessToken(),accessSecretKey,accessTokenValidTime);
-            return jwt.getExpiresAt().after(new Date());
+            DecodedJWT jwt = decodeToken(accessToken,accessSecretKey,accessTokenValidTime);
+            return !jwt.getExpiresAt().after(new Date());
         }
         catch(JWTVerificationException exception){
-            throw exception;
+            throw new JWTVerificationException("In Verify Token, Error appeared.",null);
         }
     }
 
-    public boolean isValidRefreshToken(TokenDTO tokenDTO) {
+    public boolean isExpiredRefreshToken(String refreshToken) {
         User user = new User();
         try {
-            DecodedJWT jwt = verifyToken(tokenDTO.getRefreshToken(),refreshSecretKey,refreshTokenValidTime);
-            return jwt.getExpiresAt().after(new Date());
+            DecodedJWT jwt = decodeToken(refreshToken,refreshSecretKey,refreshTokenValidTime);
+            return !jwt.getExpiresAt().after(new Date());
         }
         catch(JWTVerificationException exception){
-            throw exception;
+            throw new JWTVerificationException("In Verify Token, Error appeared.",null);
         }
     }
 
@@ -99,31 +118,24 @@ public class JwtToken {
             //
     //토큰이 유효하지 않으면교체해주는 함수
     //엑세스 토큰이 리프레시 토큰과 같은 값을 가지는지 확인하는 함수
-    public Long getIdInRefreshToken(TokenDTO tokenDTO) {
-        return Long.parseLong(verifyToken(tokenDTO.getRefreshToken(),refreshSecretKey,refreshTokenValidTime).getClaim("id").asString());
+    public long getIdInRefreshToken(String refreshToken) {
+        return Long.parseLong(decodeToken(refreshToken,refreshSecretKey,refreshTokenValidTime).getClaim("id").asString());
     }
-    public User verify(TokenDTO tokenDTO) {
-        User user = new User();
+    public UserInfoDTO verify(String accessToken) {
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
         try {
-            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(accessSecretKey))
-                    .withIssuer("hspark")
-                    .acceptExpiresAt(60* 60) // 1 hour
-                    .build();
-            DecodedJWT jwt = verifyToken(tokenDTO.getAccessToken(),accessSecretKey,accessTokenValidTime);
+            DecodedJWT jwt = decodeToken(accessToken,accessSecretKey,accessTokenValidTime);
 
-            user.setId(Long.parseLong(jwt.getClaim("id").asString()));
-            user.setAccount(jwt.getClaim("account").asString());
-            user.setNickname(jwt.getClaim("nickname").asString());
+            userInfoDTO.setId(Long.parseLong(jwt.getClaim("id").asString()));
+            userInfoDTO.setNickname(jwt.getClaim("nickname").asString());
 
-            System.out.println("DEOCDE" + jwt.getToken());
-            System.out.println(user.getId());
-            return user;
+            return userInfoDTO;
         }
         catch(JWTVerificationException exception){
-            System.out.println("JWT VERIFY EXCEPT: "+ exception.getMessage());
-            user.setId(-1L);
-            return user;
+            exception.printStackTrace();
+            throw new JWTVerificationException("In Verify Token, Error appeared.",null);
         }
     }
 
 }
+

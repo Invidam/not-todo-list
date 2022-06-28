@@ -47,23 +47,43 @@
             <version>4.3.18.RELEASE</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+            <version>4.3.18.RELEASE</version>
+        </dependency>
+
 <!--        <dependency>-->
-<!--            <groupId>org.springframework</groupId>-->
-<!--            <artifactId>spring-jdbc</artifactId>-->
-<!--            <version>4.3.18.RELEASE</version>-->
+<!--            <groupId>org.springframework.security</groupId>-->
+<!--            <artifactId>spring-security-web</artifactId>-->
+<!--            <version>5.7.1</version>-->
 <!--        </dependency>-->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>5.7.1</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.security</groupId>-->
+<!--            <artifactId>spring-security-config</artifactId>-->
+<!--            <version>5.7.1</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+            <version>5.7.1</version>
+        </dependency>
+
         <dependency>
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>
             <version>1.4</version>
         </dependency>
-
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.28</version>
         </dependency>
-
         <!-- json -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -122,12 +142,27 @@
             <version>RELEASE</version>
             <scope>compile</scope>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.session</groupId>-->
-        <!--            <artifactId>spring-session-jdbc</artifactId>-->
-        <!--            <version>2.5.3</version>-->
-        <!--            <type>pom</type>-->
-        <!--        </dependency>-->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>6.0.2.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>2.0.1.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.el</artifactId>
+            <version>3.0.0</version>
+        </dependency>
     </dependencies>
 
     <properties>

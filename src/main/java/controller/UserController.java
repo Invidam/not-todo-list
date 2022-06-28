@@ -1,18 +1,21 @@
 package controller;
 
 
+import DTO.Response.SuccessInfo;
+import DTO.Token.TokenDTO;
+import DTO.User.LoginUserDTO;
+import DTO.User.UpdateUserDTO;
+import DTO.User.UserRepresentInfoDTO;
 import domain.User;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Controller;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.portlet.ModelAndView;
+import org.springframework.http.ResponseEntity;
 import service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import javax.validation.constraints.NotEmpty;
+import java.net.URI;
 
 @RestController
 @RequestMapping("")
@@ -25,45 +28,24 @@ public class UserController {
         this.userService = userService;
     }
 
-    @RequestMapping(value="/user/profile", method = RequestMethod.GET)
-    public String profile(HttpServletRequest httpServletRequest) {
-//        TokenDTO tokenDTO = new TokenDTO(httpServletRequest.getHeader("x-jwt-access-token"),httpServletRequest.getHeader("x-jwt-refresh-token"));
-//
-//        User user = userService.verify(tokenDTO);
-//        httpServletRequest.setAttribute("user",user);
-        return "/user/profile";
+    @RequestMapping(value="/signup", method = RequestMethod.POST)
+    public  ResponseEntity<SuccessInfo> createUser(@RequestBody User user) {
+        userService.createUser(user);
+        return ResponseEntity.created(URI.create("/user/" + user.getId())).body(new SuccessInfo("SIGNUP_SUCCESS", "success at sign up."));
     }
 
     @RequestMapping(value="/user/{id}", method = RequestMethod.GET)
-    public User getUserById(@PathVariable long id) {
+    public UserRepresentInfoDTO getUserById(@PathVariable long id) {
         return userService.getUserById(id);
-//        return "/index.jsp";
     }
-
     @RequestMapping(value="/user", method = RequestMethod.PUT)
-    public User updateUser(@RequestBody User user, HttpServletResponse response) {
+    public ResponseEntity<User> updateUser(@RequestBody UpdateUserDTO updateUserDTO, @RequestHeader(value = "Authorization") String authHeader) {
 
-        userService.updateUser(user);
-        System.out.println("UPDATE USER: "+ user.getAccount());
-        return user;
+        return ResponseEntity.ok(userService.updateUser(updateUserDTO,authHeader));
     }
-
     @DeleteMapping("/user/{id}")
-    public String withdrawUser(@PathVariable long id) {
-        userService.withdrawUser(id);
-        return "comp";
+    public ResponseEntity<SuccessInfo> withdrawUser(@PathVariable long id, @RequestHeader(value = "Authorization") String authHeader) {
+        userService.withdrawUser(id,authHeader);
+        return ResponseEntity.ok(new SuccessInfo("WITHDRAW_SUCCESS", "success at withdraw user."));
     }
-//    @RequestMapping(value="/signup", method = RequestMethod.GET)
-//    public String signup() {
-//        System.out.println("signyp star");
-//        return "/auth/signup";
-//    }
-    @RequestMapping(value="/signup", method = RequestMethod.POST)
-    public String createUser(@RequestBody User user) {
-        System.out.println(user.getAccount());
-        bcrtpt
-        userService.createUser(user);
-        return "index";
-    }
-
 }

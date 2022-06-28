@@ -20,7 +20,7 @@ http://mybatis.org/schema/mybatis-spring.xsd http://www.springframework.org/sche
 
             <list>
 
-                <value>classpath*:/mybatis/config.properties</value>
+                <value>classpath*:/application.properties</value>
 
             </list>
 

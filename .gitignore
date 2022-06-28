@@ -1,5 +1,5 @@
 #db private
-src/main/resources/mybatis/config.properties
+src/main/resources/config.properties
 
 
 #JWT private
