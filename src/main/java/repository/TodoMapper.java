@@ -1,6 +1,7 @@
 package repository;
 
 import DTO.Item.ItemIdAndHashTagIdDTO;
+import DTO.Item.ItemIdAndIsDoneDTO;
 import DTO.Item.ItemInfoDTO;
 import domain.Item;
 import org.springframework.stereotype.Repository;
@@ -29,5 +30,6 @@ public interface TodoMapper {
     void updateItem(Item item);
     long getItemOwnerIdById(long id);
     void deleteItem(long id);
-}
 
+    void updateItemStatus(ItemIdAndIsDoneDTO itemIdAndIsDoneDTO);
+}

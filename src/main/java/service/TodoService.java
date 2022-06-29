@@ -1,11 +1,7 @@
 package service;
 
-import DTO.Item.ItemIdAndHashTagDTO;
+import DTO.Item.ItemIdAndIsDoneDTO;
 import DTO.Item.ItemInfoDTO;
-import domain.Item;
-import domain.User;
-
-import java.util.List;
 
 public interface TodoService {
 
@@ -15,4 +11,7 @@ public interface TodoService {
     ItemInfoDTO getItemById(long id);
     void updateItemFromInfo(ItemInfoDTO itemInfoDTO, String authHeader);
     void deleteItem(long id, String authHeader);
+
+
+    void updateItemStatus(ItemIdAndIsDoneDTO itemIdAndIsDoneDTO, String authHeader);
 }

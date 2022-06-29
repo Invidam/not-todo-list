@@ -17,10 +17,13 @@
             <mvc:exclude-mapping path="/**/*.css"/>
             <mvc:exclude-mapping path="/login"/>
             <mvc:exclude-mapping path="/signup"/>
+            <mvc:exclude-mapping path="/rank"/>
+            <mvc:exclude-mapping path="/list"/>
             <!--            <mvc:exclude-mapping path="/item/{$id}"/> // GET 한정-->
             <!--            <mvc:exclude-mapping path="/user/{$id}"/> // GET 한정-->
             <mvc:exclude-mapping path="/auth/refresh"/>
             <mvc:exclude-mapping path="/interceptor-error"/>
+            <mvc:exclude-mapping path="/interceptor-error/*"/>
 
             <bean class="interceptor.AuthInterceptor" />
         </mvc:interceptor>

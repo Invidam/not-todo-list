@@ -11,7 +11,7 @@
     <resultMap id="EmotionInItemResultMap" type="DTO.Emotion.EmotionInItemDTO">
 <!--        <collection property="itemEmotionList" javaType="list" ofType="DTO.Emotion.EmotionInItemDTO">-->
             <result property="emotionId" column="emotion_id" />
-            <collection property="userInfoDTOList" resultMap="UserInfoResultMap"/>
+            <collection property="userInfoList" resultMap="UserInfoResultMap"/>
 <!--        </collection>-->
     </resultMap>
     <resultMap id="ItemResultMap" type="DTO.Item.ItemInfoDTO">
@@ -73,7 +73,7 @@
             LEFT JOIN item_hash_tag AS ih ON  i.id = ih.item_id
             LEFT JOIN hash_tag AS h ON h.id = ih.hash_tag_id
             LEFT JOIN item_emotion AS ie ON i.id = ie.item_id
-            LEFT JOIN user AS u ON u.id = ie.user_id
+            LEFT JOIN user AS u ON u.id = i.user_id
         </select>
         <update id="updateItem" parameterType="domain.Item">
             UPDATE item SET title = #{title}, priority= #{priority}, deadline = #{deadline},edited_at = now() ,description=#{description} , is_done = #{isDone} , is_edited = 1 WHERE id =#{id}
@@ -84,4 +84,8 @@
         <select id="getInsertedItemId" resultType="long">
             SELECT LAST_INSERT_ID()
         </select>
+        <update id="updateItemStatus" parameterType="DTO.Item.ItemIdAndIsDoneDTO">
+            UPDATE item SET is_done = #{isDone}  WHERE id =#{id}
+        </update>
+
 </mapper>

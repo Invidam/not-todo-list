@@ -6,7 +6,7 @@ import DTO.Token.TokenDTO;
 import auth.Encryption;
 import auth.JwtToken;
 import domain.User;
-import exception.token.InCorreftRefreshTokenException;
+import exception.token.InCorrectRefreshTokenException;
 import exception.token.RefreshTokenExpiredException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AccountExpiredException;
@@ -87,7 +87,7 @@ public class AuthServiceImpl implements AuthService{
             if (jwtToken.isExpiredRefreshToken(inputtedRefreshToken))
                 throw new RefreshTokenExpiredException("Refresh Token is expired.");
             if (dbRefreshToken.isEmpty() || !(Objects.equals(dbRefreshToken, inputtedRefreshToken)))
-                throw new InCorreftRefreshTokenException("Inputted Refresh Token is not equal to DB's Refresh Token.");
+                throw new InCorrectRefreshTokenException("Inputted Refresh Token is not equal to DB's Refresh Token.");
 
             TokenDTO newTokenDTO = jwtToken.create(userMapper.getUserById(id));
             authMapper.updateRefreshTokenById(new UserIdAndTokenDTO(id, newTokenDTO.getRefreshToken()));

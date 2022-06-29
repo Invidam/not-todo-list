@@ -1,10 +1,11 @@
 package repository;
 
-import DTO.Emotion.EmotionWithUserDTODTO;
+import DTO.Emotion.EmotionWithUserDTO;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EmotionMapper {
-    void createEmotion(EmotionWithUserDTODTO emotionWithUserDTO);
-    void deleteEmotion(EmotionWithUserDTODTO emotionWithUserDTO);
+    boolean isExistEmotionRelation(EmotionWithUserDTO emotionWithUserDTO);
+    void createEmotion(EmotionWithUserDTO emotionWithUserDTO);
+    void deleteEmotion(EmotionWithUserDTO emotionWithUserDTO);
 }

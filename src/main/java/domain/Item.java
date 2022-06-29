@@ -19,7 +19,6 @@ public class Item {
     @NotEmpty(message = "Priority is empty.")
     private int priority;
 
-    @NotEmpty(message = "Created at is empty.")
     private Date createdAt;
     private Date editedAt;
     private Date deadline;

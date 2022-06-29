@@ -3,7 +3,12 @@ package controller;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import exception.token.InCorreftRefreshTokenException;
+import exception.emotion.AlreadyExistEmotionRelationException;
+import exception.emotion.EmotionRelationNotFoundException;
+import exception.item.ItemNotFoundException;
+import exception.token.AccessTokenExpiredException;
+import exception.token.InCorrectAccessTokenException;
+import exception.token.InCorrectRefreshTokenException;
 import exception.token.RefreshTokenExpiredException;
 import exception.user.UserAlreadyExistException;
 import exception.user.UserMismatchException;
@@ -17,28 +22,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import javax.servlet.http.HttpServletRequest;
-
 @RestController
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private final String INVALID_TOKEN = "Bearer error=invalid_token";
-
-    @RequestMapping(value="/interceptor-error", method = RequestMethod.GET)
-    public void interceptorError(HttpServletRequest httpServletRequest) throws Exception {
-        Exception exception = (Exception) httpServletRequest.getAttribute("exception");
-        String name = (String) httpServletRequest.getAttribute("name");
-        String message = (String) httpServletRequest.getAttribute("message");
-        System.out.println("CASE: " + name);
-        switch (name) {
-            case "AuthorizationServiceException": throw new AuthorizationServiceException(message);
-            case "RefreshTokenExpiredException": throw new RefreshTokenExpiredException(message);
-            case "InCorreftRefreshTokenException": throw new InCorreftRefreshTokenException(message);
-            default: throw new Exception("Interceptor error.");
-        }
-
-    }
-
 
     @ExceptionHandler(value = UsernameNotFoundException.class)
     public ResponseEntity<ErrorInfo> handleUserNotFoundException(UsernameNotFoundException e) {
@@ -77,8 +64,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header("WWW-Authenticate", INVALID_TOKEN).body(errorInfo);
 
     }
-    @ExceptionHandler(value = InCorreftRefreshTokenException.class)
-    public ResponseEntity<ErrorInfo> handleInCorrectRefreshTokenException(InCorreftRefreshTokenException e) {
+    @ExceptionHandler(value = InCorrectRefreshTokenException.class)
+    public ResponseEntity<ErrorInfo> handleInCorrectRefreshTokenException(InCorrectRefreshTokenException e) {
         e.printStackTrace();
         ErrorInfo errorInfo = new ErrorInfo("INCORRECT_REFRESH_TOKEN",e.getMessage(),403,-111);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).header("WWW-Authenticate", INVALID_TOKEN).body(errorInfo);
@@ -105,6 +92,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header("WWW-Authenticate", INVALID_TOKEN).body(errorInfo);
 
     }
+    @ExceptionHandler(value = AccessTokenExpiredException.class)
+    public ResponseEntity<ErrorInfo> handleInCorrectAccessTokenException(AccessTokenExpiredException e) {
+        e.printStackTrace();
+        ErrorInfo errorInfo = new ErrorInfo("ACCESS_TOKEN_EXPIRED",e.getMessage(),401,-115);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header("WWW-Authenticate", INVALID_TOKEN).body(errorInfo);
+
+    }
+    @ExceptionHandler(value = InCorrectAccessTokenException.class)
+    public ResponseEntity<ErrorInfo> handleInCorrectAccessTokenException(InCorrectAccessTokenException e) {
+        e.printStackTrace();
+        ErrorInfo errorInfo = new ErrorInfo("INCORRECT_ACCESS_TOKEN",e.getMessage(),401,-116);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header("WWW-Authenticate", INVALID_TOKEN).body(errorInfo);
+
+    }
     @ExceptionHandler(value = AuthorizationServiceException.class)
     public ResponseEntity<ErrorInfo> handleAuthorizationServiceException(AuthorizationServiceException e) {
         e.printStackTrace();
@@ -114,32 +115,34 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(UserAlreadyExistException.class)
-    public ResponseEntity<ErrorInfo> handleF(UserAlreadyExistException e) {
+    public ResponseEntity<ErrorInfo> handleUserAlreadyExistException(UserAlreadyExistException e) {
         e.printStackTrace();
         ErrorInfo errorInfo = new ErrorInfo("ALREADY_EXIST_USER",e.getMessage(),400,-200);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorInfo);
 
     }
+    @ExceptionHandler(ItemNotFoundException.class)
+    public ResponseEntity<ErrorInfo> handleItemNotFoundException(ItemNotFoundException e) {
+        e.printStackTrace();
+        ErrorInfo errorInfo = new ErrorInfo("ITEM_NOT_FOUND",e.getMessage(),404,-300);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorInfo);
+    }
+
+    @ExceptionHandler(AlreadyExistEmotionRelationException.class)
+    public ResponseEntity<ErrorInfo> handleAlreadyExistEmotionException(AlreadyExistEmotionRelationException e) {
+        e.printStackTrace();
+        ErrorInfo errorInfo = new ErrorInfo("ALREADY_EXIST_EMOTION_RELATION",e.getMessage(),400,-400);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorInfo);
+
+    }
+    @ExceptionHandler(EmotionRelationNotFoundException.class)
+    public ResponseEntity<ErrorInfo> handleEmotionNotFoundException(EmotionRelationNotFoundException e) {
+        e.printStackTrace();
+        ErrorInfo errorInfo = new ErrorInfo("EMOTION_RELATION_NOT_FOUND",e.getMessage(),404,-401);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorInfo);
+
+    }
 //    @ExceptionHandler(X.class)
-//    public ResponseEntity<ErrorInfo> handleF(X e) {
-////        e.printStackTrace();
-//        ErrorInfo errorInfo = new ErrorInfo("","",4,-);
-//        return ResponseEntity.status(HttpStatus.).body(errorInfo);
-//
-//    }
-//    @ExceptionHandler(X.class)
-////    public ResponseEntity<ErrorInfo> handleF(X e) {
-//////        e.printStackTrace();
-////        ErrorInfo errorInfo = new ErrorInfo("","",4,-);
-////        return ResponseEntity.status(HttpStatus.).body(errorInfo);
-////
-////    }//    @ExceptionHandler(X.class)
-////    public ResponseEntity<ErrorInfo> handleF(X e) {
-//////        e.printStackTrace();
-////        ErrorInfo errorInfo = new ErrorInfo("","",4,-);
-////        return ResponseEntity.status(HttpStatus.).body(errorInfo);
-////
-////    }//    @ExceptionHandler(X.class)
 ////    public ResponseEntity<ErrorInfo> handleF(X e) {
 //////        e.printStackTrace();
 ////        ErrorInfo errorInfo = new ErrorInfo("","",4,-);
@@ -181,6 +184,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         e.printStackTrace();
         ErrorInfo errorInfo = new ErrorInfo("NULL_POINTER",e.getMessage(),400,-1);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorInfo);
+
+    }
+    @ExceptionHandler(value = Exception.class)
+    public ResponseEntity<ErrorInfo> handleException(Exception e) {
+        e.printStackTrace();
+        ErrorInfo errorInfo = new ErrorInfo("UNEXPECTED_ERROR",e.getMessage(),500,0);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorInfo);
 
     }
 

@@ -2,6 +2,7 @@ package service;
 
 import DTO.Item.ItemIdAndHashTagDTO;
 import DTO.Item.ItemIdAndHashTagIdDTO;
+import DTO.Item.ItemIdAndIsDoneDTO;
 import DTO.Item.ItemInfoDTO;
 import auth.JwtToken;
 import domain.Item;
@@ -69,11 +70,14 @@ public class TodoServiceImpl implements TodoService{
         makeHashTags(itemInfoDTO.getHashTagList());
         createHashTagsRelationship(itemInfoDTO.getId(), itemInfoDTO.getHashTagList());
     }
+    private void checkIsExistItem(long id ,String errorMessage) {
+        if(!todoMapper.isExistItem(id))
+            throw new ItemNotFoundException(errorMessage);
 
+    }
     @Override
     public ItemInfoDTO getItemById(long id) {
-        if(!todoMapper.isExistItem(id))
-            throw new ItemNotFoundException("Inputted Path's Item is not exists.");
+        checkIsExistItem(id, "Inputted Path's Item is not exists.");
         return todoMapper.getItemInfoById(id);
     }
 
@@ -83,7 +87,8 @@ public class TodoServiceImpl implements TodoService{
 
     @Override
     public void updateItemFromInfo(ItemInfoDTO itemInfoDTO, String authHeader) {
-        userService.checkUserById(itemInfoDTO.getId(),jwtToken.getAccessTokenInHeader(authHeader));
+        userService.checkUserById(itemInfoDTO.getUserId(),authHeader);
+        checkIsExistItem(itemInfoDTO.getId(), "To Update Item is not exists.");
 
         updateItem(itemInfoDTO);
 
@@ -92,8 +97,18 @@ public class TodoServiceImpl implements TodoService{
     }
     @Override
     public void deleteItem(long id, String authHeader) {
-        userService.checkUserById(todoMapper.getItemOwnerIdById(id),jwtToken.getAccessTokenInHeader(authHeader));
+        checkIsExistItem(id, "To Delete Item is not exists.");
+        userService.checkUserById(todoMapper.getItemOwnerIdById(id),authHeader);
         todoMapper.deleteItem(id);
+    }
+
+
+    @Override
+    public void updateItemStatus(ItemIdAndIsDoneDTO itemIdAndIsDoneDTO, String authHeader) {
+        checkIsExistItem(itemIdAndIsDoneDTO.getId(), "To Update Item is not exists.");
+        userService.checkUserById(todoMapper.getItemOwnerIdById(itemIdAndIsDoneDTO.getId()),authHeader);
+
+        todoMapper.updateItemStatus(itemIdAndIsDoneDTO);
     }
     /*
 * C
@@ -106,4 +121,3 @@ public class TodoServiceImpl implements TodoService{
 * */
 
 }
-

@@ -1,28 +1,17 @@
 package DTO.Token;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.validation.constraints.NotEmpty;
+
+@Getter
+@Setter
+@AllArgsConstructor
 public class UserIdAndTokenDTO {
+    @NotEmpty(message = "UserIdAndTokenDTO's Id is empty.")
     private long id;
+    @NotEmpty(message = "UserIdAndTokenDTO's refreshToken is empty.")
     private String refreshToken;
-
-    public UserIdAndTokenDTO(long id, String refreshToken) {
-        this.id = id;
-        this.refreshToken = refreshToken;
-    }
-
-    public long getId() {
-        return id;
-    }
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-
-
-
-    public void setId(long id) {
-        this.id = id;
-    }
-    public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
 }

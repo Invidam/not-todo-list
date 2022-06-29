@@ -1,8 +1,8 @@
 package interceptor;
 
 import auth.JwtToken;
-import exception.token.InCorreftRefreshTokenException;
-import exception.token.RefreshTokenExpiredException;
+import exception.token.AccessTokenExpiredException;
+import exception.token.InCorrectAccessTokenException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -64,21 +64,16 @@ public class AuthInterceptor implements HandlerInterceptor {
                 throw new AuthorizationServiceException("Header Authorization Is Empty");
             String accessToken = jwtToken.getAccessTokenInHeader(httpServletRequest.getHeader("Authorization"));
             if(jwtToken.isExpiredAccessToken(accessToken))
-                throw new RefreshTokenExpiredException("Access Token is expired.");
+                throw new AccessTokenExpiredException("Access Token is expired.");
+
             if (Objects.isNull(jwtToken.verify(accessToken)))
-                throw new InCorreftRefreshTokenException("Header's Access Token is not equal to DB's Refresh Token.");
-            //AuthorizationServiceException
-            //RefreshTokenExpiredException
-            //InCorreftRefreshTokenException
-
-
+                throw new InCorrectAccessTokenException("Header's Access Token is not equal to DB's Refresh Token.");
             return true;
         }
         catch(Exception e) {
-            httpServletRequest.setAttribute("exception", e);
+            e.printStackTrace();
             httpServletRequest.setAttribute("name",e.getClass().getSimpleName());
             httpServletRequest.setAttribute("message",e.getMessage());
-
             httpServletRequest.getRequestDispatcher("/interceptor-error").forward(httpServletRequest,httpServletResponse);
             return false;
         }

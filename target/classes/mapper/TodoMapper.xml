@@ -11,7 +11,7 @@
     <resultMap id="EmotionInItemResultMap" type="DTO.Emotion.EmotionInItemDTO">
 <!--        <collection property="itemEmotionList" javaType="list" ofType="DTO.Emotion.EmotionInItemDTO">-->
             <result property="emotionId" column="emotion_id" />
-            <collection property="userInfoDTOList" resultMap="UserInfoResultMap"/>
+            <collection property="userInfoList" resultMap="UserInfoResultMap"/>
 <!--        </collection>-->
     </resultMap>
     <resultMap id="ItemResultMap" type="DTO.Item.ItemInfoDTO">
@@ -25,11 +25,7 @@
         <result property="isEdited" column="is_edited" />
         <result property="isShared" column="is_shared" />
         <result property="isDeleted" column="is_deleted" />
-        <result property="account" column="account" />
-        <result property="password" column="password" />
-        <result property="nickname" column="nickname" />
-        <result property="isDeleted" column="is_deleted" />
-        <result property="createdAt" column="created_at" />
+        <collection property="owner" resultMap="UserInfoResultMap"/>
         <collection property="hashTagList" javaType="list" ofType="java.lang.String">
             <result column="hash_tags" />
         </collection>
@@ -47,6 +43,9 @@
         <select id="isExistHashTagRelationship" parameterType="DTO.Item.ItemIdAndHashTagIdDTO" resultType="boolean">
             SELECT IF(COUNT(*) != 0, 1, 0) FROM item_hash_tag WHERE hash_tag_id = #{hashTagId} and item_id = #{itemId}
         </select>
+        <select id="isExistItem" parameterType="long" resultType="boolean">
+            SELECT IF(COUNT(*) != 0, 1, 0) FROM item WHERE id=#{id} and (is_deleted = false or is_deleted is null)
+        </select>
         <insert id="createHashTag" parameterType="String">
             INSERT INTO hash_tag (hash_tag_name) VALUES(#{hashTag})
         </insert>
@@ -55,9 +54,9 @@
             INSERT INTO item_hash_tag (item_id, hash_tag_id) VALUES(#{itemId}, #{hashTagId})
         </insert>
 
-<!--        <select id="getItemIdByTitle" parameterType="String" resultType="long">-->
-<!--            SELECT id FROM item WHERE title = #{title}-->
-<!--        </select>-->
+        <select id="getItemOwnerIdById" parameterType="long" resultType="long">
+            SELECT user_id FROM item WHERE id = #{id}
+        </select>
 
         <insert id="createItem" parameterType="domain.Item">
             INSERT INTO item (user_id, title, priority, created_at, deadline, description, is_done) VALUES(#{userId}, #{title},#{priority},now(),#{deadline}, #{description}, 0)
@@ -74,7 +73,7 @@
             LEFT JOIN item_hash_tag AS ih ON  i.id = ih.item_id
             LEFT JOIN hash_tag AS h ON h.id = ih.hash_tag_id
             LEFT JOIN item_emotion AS ie ON i.id = ie.item_id
-            LEFT JOIN user AS u ON u.id = ie.user_id
+            LEFT JOIN user AS u ON u.id = i.user_id
         </select>
         <update id="updateItem" parameterType="domain.Item">
             UPDATE item SET title = #{title}, priority= #{priority}, deadline = #{deadline},edited_at = now() ,description=#{description} , is_done = #{isDone} , is_edited = 1 WHERE id =#{id}
@@ -85,4 +84,8 @@
         <select id="getInsertedItemId" resultType="long">
             SELECT LAST_INSERT_ID()
         </select>
+        <update id="updateItemStatus" parameterType="DTO.Item.ItemIdAndIsDoneDTO">
+            UPDATE item SET is_done = #{isDone}  WHERE id =#{id}
+        </update>
+
 </mapper>

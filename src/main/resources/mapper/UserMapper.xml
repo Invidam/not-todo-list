@@ -2,11 +2,20 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="repository.UserMapper">
+    <resultMap id="UserRankInfoResultMap" type="DTO.User.UserRankInfoDTO">
+        <id property="id" column="id"/>
+        <result property="nickname" column="nickname" />
+        <result property="point" column="point" />
+        <result property="ranking" column="ranking" />
+    </resultMap>
+    <resultMap id="UserRankResultMap" type="DTO.User.RankDTO">
+        <collection property="userRankList" resultMap="UserRankInfoResultMap"/>
+    </resultMap>
     <resultMap id="ItemResultMap" type="DTO.Item.ItemInUserDTO">
         <id property="id" column="item_id"/>
         <result property="title" column="item_title" />
     </resultMap>
-        <resultMap id="UserRepresentResultMap" type="DTO.User.UserRepresentInfoDTO">
+    <resultMap id="UserRepresentResultMap" type="DTO.User.UserRepresentInfoDTO">
         <id property="id" column="id" />
         <result property="nickname" column="nickname" />
         <result property="createdAt" column="created_at" />
@@ -59,5 +68,13 @@
         LEFT JOIN item AS i ON i.user_id = u.id and (i.is_deleted = false or i.is_deleted is null)
         ORDER BY i.created_at  DESC
         LIMIT 10
+    </select>
+    <select id="getRank" resultMap="UserRankResultMap">
+        SELECT u.id, u.nickname , sum(i.priority) as point, dense_rank() over
+        (order by sum(i.priority) desc) as ranking FROM (
+        (SELECT * FROM not_todo_list.user WHERE (is_deleted = false or is_deleted is null)) u
+        LEFT JOIN item AS i ON
+        i.user_id = u.id and (i.is_deleted = false or i.is_deleted is null) and (MONTH(i.created_at) = MONTH(current_date())) and  (i.is_done = 1))
+        group by u.id
     </select>
 </mapper>

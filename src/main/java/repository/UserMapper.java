@@ -1,5 +1,6 @@
 package repository;
 
+import DTO.User.RankDTO;
 import DTO.User.UserRepresentInfoDTO;
 import domain.User;
 import org.springframework.stereotype.Repository;
@@ -15,4 +16,6 @@ public interface UserMapper {
     boolean isExistNickname(String account);
     boolean isExistUser(long id);
     UserRepresentInfoDTO getUserRepresentInfoById(long id);
+
+    RankDTO getRank();
 }

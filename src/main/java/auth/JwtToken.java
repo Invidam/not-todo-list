@@ -8,6 +8,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,9 +93,13 @@ public class JwtToken {
     public boolean isExpiredAccessToken(String accessToken) {
         try {
             DecodedJWT jwt = decodeToken(accessToken,accessSecretKey,accessTokenValidTime);
-            return !jwt.getExpiresAt().after(new Date());
+            return jwt.getExpiresAt().before(new Date());
+        }
+        catch(TokenExpiredException exception) {
+            return true;
         }
         catch(JWTVerificationException exception){
+            exception.printStackTrace();
             throw new JWTVerificationException("In Verify Token, Error appeared.",null);
         }
     }
@@ -103,9 +108,13 @@ public class JwtToken {
         User user = new User();
         try {
             DecodedJWT jwt = decodeToken(refreshToken,refreshSecretKey,refreshTokenValidTime);
-            return !jwt.getExpiresAt().after(new Date());
+            return jwt.getExpiresAt().before(new Date());
+        }
+        catch(TokenExpiredException exception) {
+            return true;
         }
         catch(JWTVerificationException exception){
+            exception.printStackTrace();
             throw new JWTVerificationException("In Verify Token, Error appeared.",null);
         }
     }

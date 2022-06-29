@@ -21,6 +21,7 @@
             <!--            <mvc:exclude-mapping path="/user/{$id}"/> // GET 한정-->
             <mvc:exclude-mapping path="/auth/refresh"/>
             <mvc:exclude-mapping path="/interceptor-error"/>
+            <mvc:exclude-mapping path="/interceptor-error/*"/>
 
             <bean class="interceptor.AuthInterceptor" />
         </mvc:interceptor>

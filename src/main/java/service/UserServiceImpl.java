@@ -1,5 +1,6 @@
 package service;
 
+import DTO.User.RankDTO;
 import DTO.User.UpdateUserDTO;
 import DTO.User.UserRepresentInfoDTO;
 import auth.Encryption;
@@ -47,30 +48,37 @@ public class UserServiceImpl implements UserService{
         return userMapper.getUserRepresentInfoById(id);
     }
     @Override
-    public void checkUserById(long id, String accessToken) {
+    public void checkUserById(long id, String authHeader) {
+        String accessToken = jwtToken.getAccessTokenInHeader(authHeader);
         if(!userMapper.isExistUser(id))
             throw new UsernameNotFoundException("Inputted User is not exists.");
         if(id != jwtToken.verify(accessToken).getId())
             throw new UserMismatchException("Token's User is not equal to Inputted User.");
     }
     @Override
-    public User updateUser(UpdateUserDTO updateUserDTO, String authHeader) {
+    public void updateUser(UpdateUserDTO updateUserDTO, String authHeader) {
 
-        checkUserById(updateUserDTO.getId(), jwtToken.getAccessTokenInHeader(authHeader));
-
-        if (!encryption.isMatch(updateUserDTO.getPassword(), userMapper.getUserById(updateUserDTO.getId()).getPassword()))
+        checkUserById(updateUserDTO.getId(), authHeader);
+        String dbHashedPassword = userMapper.getUserById(updateUserDTO.getId()).getPassword();
+        if(!encryption.isMatch(updateUserDTO.getPassword(),dbHashedPassword))
             throw new BadCredentialsException("Does Not Match the Existing Password.");
+
         if(!updateUserDTO.getUpdatedPassword().isEmpty())
             updateUserDTO.setPassword(encryption.generate(updateUserDTO.getUpdatedPassword()));
-        userMapper.updateUser(updateUserDTO);
+        else
+            updateUserDTO.setPassword(dbHashedPassword);
 
-        return updateUserDTO;
+        userMapper.updateUser(updateUserDTO);
     }
     @Override
     public void withdrawUser(long id, String authHeader) {
 
-        checkUserById(id,jwtToken.getAccessTokenInHeader(authHeader));
+        checkUserById(id,authHeader);
         userMapper.withdrawUser(id);
+    }
+    @Override
+    public RankDTO getRank() {
+        return userMapper.getRank();
     }
 
 }
