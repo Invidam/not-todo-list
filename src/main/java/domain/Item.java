@@ -1,6 +1,8 @@
 package domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotEmpty;
@@ -8,6 +10,8 @@ import java.sql.Date;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Item {
     private long id;
     @NotEmpty(message = "User ID is empty.")
@@ -62,4 +66,5 @@ public class Item {
     public void setIsDeleted(boolean deleted) {
         isDeleted = deleted;
     }
+
 }

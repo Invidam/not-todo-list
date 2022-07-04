@@ -11,7 +11,7 @@
         SELECT refresh_token FROM user WHERE id = #{id}
     </select>
 
-    <update id="updateRefreshTokenById" parameterType="DTO.Token.UserIdAndTokenDTO">
+    <update id="updateRefreshTokenById" parameterType="DTO.User.UserIdAndTokenDTO">
         UPDATE user SET refresh_token = #{refreshToken} WHERE id =#{id}
     </update>
 

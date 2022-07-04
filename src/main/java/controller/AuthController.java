@@ -1,50 +1,46 @@
 package controller;
 
-
-import DTO.Response.SuccessInfo;
 import DTO.User.LoginUserDTO;
 import DTO.Token.TokenDTO;
+import DTO.User.UserAndTokenDTO;
+import DTO.User.UserIdAndTokenDTO;
+import enums.SuccessStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.web.bind.annotation.*;
 import service.AuthService;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.util.HashMap;
-import java.util.Map;
+import utility.DTOEntityMapper;
 
 @RestController
 @RequestMapping("")
 public class AuthController {
 
     private final AuthService authService;
+    private final DTOEntityMapper dtoEntityMapper;
 
     @Autowired
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, DTOEntityMapper dtoEntityMapper) {
         this.authService = authService;
+        this.dtoEntityMapper = dtoEntityMapper;
     }
+
     @RequestMapping(value="/login", method = RequestMethod.POST)
     public ResponseEntity<TokenDTO> loginUser(@RequestBody LoginUserDTO loginUserDTO) {
-        return ResponseEntity.ok(authService.login(loginUserDTO));
+        UserAndTokenDTO userAndTokenDTO = authService.getLoggedInUserAndToken(dtoEntityMapper.toEntity(loginUserDTO));
+        authService.updateUserRefreshToken(new UserIdAndTokenDTO(userAndTokenDTO.getId(),userAndTokenDTO.getToken().getRefreshToken()));
+        return ResponseEntity.ok(userAndTokenDTO.getToken());
+    }
+
+    @RequestMapping(value="/logout", method = RequestMethod.GET)
+    public ResponseEntity<SuccessStatus> logoutUser(@RequestHeader(value = "Authorization") String accessToken) {
+        return  ResponseEntity.ok(SuccessStatus.LOGOUT);
     }
 
     @RequestMapping(value="/auth/refresh", method = RequestMethod.POST)
     public ResponseEntity<TokenDTO> refreshToken(@RequestBody TokenDTO tokenDTO) {
-        return  ResponseEntity.ok(authService.refreshToken(tokenDTO.getRefreshToken()));
-    }
-    /*
-    * @RequestHeader("Authorization") 으로 받은 Accesstoken 처리하기
-    * Bearere ${ACcess token } 꼴임.
-    * */
+        long id = authService.verifyRefreshToken(tokenDTO.getRefreshToken());
+        authService.checkRefreshToken(new UserIdAndTokenDTO(id,tokenDTO.getRefreshToken()));
 
-    @RequestMapping(value="/logout", method = RequestMethod.GET)
-    public ResponseEntity<SuccessInfo> logoutUser(@NotEmpty(message = "Access Token is empty.") @RequestHeader(value = "Authorization") String accessToken) {
-
-        return  ResponseEntity.ok(new SuccessInfo("LOGOUT_SUCCESS", "success at logout."));
+        return ResponseEntity.ok(authService.refreshToken(id));
     }
 }

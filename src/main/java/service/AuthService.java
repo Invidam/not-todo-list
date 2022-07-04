@@ -1,13 +1,24 @@
 package service;
 
-import DTO.User.LoginUserDTO;
 import DTO.Token.TokenDTO;
-
-import javax.security.auth.RefreshFailedException;
+import DTO.User.UserAndTokenDTO;
+import DTO.User.UserIdAndTokenDTO;
+import domain.User;
+import domainGroup.User.LoginUser;
 
 public interface AuthService {
 
-    TokenDTO login(LoginUserDTO loginUserDTO);
 
-    TokenDTO refreshToken(String refreshToken);
+    UserAndTokenDTO getLoggedInUserAndToken(LoginUser loginUser);
+
+    TokenDTO getTokenFor(User user);
+
+    void updateUserRefreshToken(UserIdAndTokenDTO userIdAndTokenDTO);
+
+
+    long verifyRefreshToken(String inputtedRefreshToken);
+
+    void checkRefreshToken(UserIdAndTokenDTO userIdAndTokenDTO);
+
+    TokenDTO refreshToken(long id);
 }

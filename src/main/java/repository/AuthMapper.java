@@ -1,6 +1,6 @@
 package repository;
 
-import DTO.Token.UserIdAndTokenDTO;
+import DTO.User.UserIdAndTokenDTO;
 import org.springframework.stereotype.Repository;
 
 @Repository

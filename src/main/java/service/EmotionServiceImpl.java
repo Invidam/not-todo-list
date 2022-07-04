@@ -1,6 +1,7 @@
 package service;
 
-import DTO.Emotion.EmotionWithUserDTO;
+import domain.EmotionRelation;
+import enums.ExceptionMessage;
 import exception.emotion.AlreadyExistEmotionRelationException;
 import exception.emotion.EmotionRelationNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,23 +11,25 @@ import repository.EmotionMapper;
 @Service
 public class EmotionServiceImpl implements EmotionService {
 
-    @Autowired
-    private EmotionMapper emotionMapper;
+    private final EmotionMapper emotionMapper;
 
-    @Override
-    public void createEmotion(EmotionWithUserDTO emotionWithUserDTO) {
-        if(emotionMapper.isExistEmotionRelation(emotionWithUserDTO))
-            throw new AlreadyExistEmotionRelationException("Emotion Relation is already exist.");
-        emotionMapper.createEmotion(emotionWithUserDTO);
+    @Autowired
+    public EmotionServiceImpl(EmotionMapper emotionMapper ) {
+        this.emotionMapper = emotionMapper;
     }
 
     @Override
-    public void deleteEmotion(EmotionWithUserDTO emotionWithUserDTO) {
-        if(!emotionMapper.isExistEmotionRelation(emotionWithUserDTO))
-            throw new EmotionRelationNotFoundException("Emotion Relation is not found.");
-            //아이템 존재 판단?
-            //감정표현 존재 판단? - 프론트엔드에 감정표현 목록이 이미 존재함 (선택하기 위해)
-        emotionMapper.deleteEmotion(emotionWithUserDTO);
+    public void createEmotion(EmotionRelation emotionRelation) {
+        if(emotionMapper.isExistEmotionRelation(emotionRelation))
+            throw new AlreadyExistEmotionRelationException(ExceptionMessage.EMOTION_REL_IS_EXIST.getMessage());
+        emotionMapper.createEmotion(emotionRelation);
+    }
+
+    @Override
+    public void deleteEmotion(EmotionRelation emotionRelation) {
+        if(!emotionMapper.isExistEmotionRelation(emotionRelation))
+            throw new EmotionRelationNotFoundException(ExceptionMessage.EMOTION_REL_NOT_FOUND.getMessage());
+        emotionMapper.deleteEmotion(emotionRelation);
     }
 
 }

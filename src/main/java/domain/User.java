@@ -28,4 +28,5 @@ public class User {
     public void setIsDeleted(boolean deleted) {
         isDeleted = deleted;
     }
+
 }

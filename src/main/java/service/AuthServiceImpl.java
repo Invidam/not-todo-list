@@ -1,11 +1,14 @@
 package service;
 
-import DTO.Token.UserIdAndTokenDTO;
-import DTO.User.LoginUserDTO;
 import DTO.Token.TokenDTO;
+import DTO.User.UserAndTokenDTO;
+import DTO.User.UserIdAndTokenDTO;
 import auth.Encryption;
 import auth.JwtToken;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import domain.User;
+import domainGroup.User.LoginUser;
+import enums.ExceptionMessage;
 import exception.token.InCorrectRefreshTokenException;
 import exception.token.RefreshTokenExpiredException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,90 +19,77 @@ import org.springframework.stereotype.Service;
 import repository.AuthMapper;
 import repository.UserMapper;
 
-import javax.validation.constraints.NotEmpty;
 import java.util.Objects;
 
 @Service
 public class AuthServiceImpl implements AuthService{
 
-    @Autowired
     private final JwtToken jwtToken;
-    @Autowired
     private final Encryption encryption;
 
-    @Autowired
-    private UserMapper userMapper;
-    @Autowired
-    private AuthMapper authMapper;
+    private final UserMapper userMapper;
+    private final AuthMapper authMapper;
 
-    public AuthServiceImpl(JwtToken jwtToken, Encryption encryption) {
+    @Autowired
+    public AuthServiceImpl(JwtToken jwtToken, Encryption encryption, UserMapper userMapper, AuthMapper authMapper) {
         this.jwtToken = jwtToken;
         this.encryption = encryption;
+        this.userMapper = userMapper;
+        this.authMapper = authMapper;
     }
 
     @Override
-    public TokenDTO login(LoginUserDTO loginUserDTO) {
+    public UserAndTokenDTO getLoggedInUserAndToken(LoginUser loginUser) {
         try {
-            User loggedInUser = userMapper.getUserByAccount(loginUserDTO.getAccount());
-            if(loggedInUser.getIsDeleted()) throw new AccountExpiredException("User is Deleted");
-            if (!encryption.isMatch(loginUserDTO.getPassword(), loggedInUser.getPassword()))
-                throw new BadCredentialsException("Password is wrong.");
 
-            TokenDTO tokenDTO = jwtToken.create(loggedInUser);
-            authMapper.updateRefreshTokenById(new UserIdAndTokenDTO(loggedInUser.getId(), tokenDTO.getRefreshToken()));
+            User loggedInUser = userMapper.getUserByAccount(loginUser.getAccount());
+            if(loggedInUser.getIsDeleted()) throw new AccountExpiredException(ExceptionMessage.ACCOUNT_EXPIRED.getMessage());
+            if (!encryption.isMatch(loginUser.getPassword(), loggedInUser.getPassword()))
+                throw new BadCredentialsException(ExceptionMessage.WRONG_PASSWORD.getMessage());
 
-            return tokenDTO;
+            return new UserAndTokenDTO(loggedInUser.getId(), jwtToken.create(loggedInUser));
         }
         catch(NullPointerException nullPointerException) {
             //DB에 유저를 찾지 못한 경우
-            throw new UsernameNotFoundException("Login User not found");
+            throw new UsernameNotFoundException(ExceptionMessage.LOGIN_USER_NOT_FOUND.getMessage());
+        }
+    }
+    @Override
+    public TokenDTO getTokenFor(User user) {
+        return jwtToken.create(user);
+    }
+    @Override
+    public void updateUserRefreshToken(UserIdAndTokenDTO userIdAndTokenDTO) {
+        authMapper.updateRefreshTokenById(userIdAndTokenDTO);
+    }
+
+    @Override
+    public long verifyRefreshToken(String inputtedRefreshToken) {
+        try {
+            return jwtToken.verifyRefreshToken(inputtedRefreshToken);
+        }
+        catch(JWTVerificationException e) {
+            throw new RefreshTokenExpiredException(e.getMessage());
         }
     }
 
-//    @Override
-//    public User logout(String accessToken) {
-//        try {
-//            UserInfoDTO userInfoDTO = jwtToken.verify(accessToken);
-//
-//            User loggedInUser = userMapper.getUserById(userInfoDTO.getId());
-//            if(loggedInUser.getRefreshToken().isEmpty()) throw new AccountExpiredException("User is Deleted");
-//            authMapper.updateRefreshTokenById(new UserIdAndTokenDTO(loggedInUser.getId(),""));
-////            return tokenDTO;
-//        }
-//        catch(NullPointerException nullPointerException) {
-//            //DB에 유저를 찾지 못한 경우
-//            throw new UsernameNotFoundException("Login User not found");
-//        }
-////        return jwttoken.verify(token);
-//        //db에 있어야 함
-//        //db에 있는거 삭제
-//        //ok sign 보내기
-//    }
-
-
-
     @Override
-    public TokenDTO refreshToken(@NotEmpty(message = "RefreshToken is empty.") String inputtedRefreshToken) {
+    public void checkRefreshToken(UserIdAndTokenDTO userIdAndTokenDTO) {
         try {
-            long id = jwtToken.getIdInRefreshToken(inputtedRefreshToken);
-            String dbRefreshToken = authMapper.getRefreshTokenById(id);
-
-            if (jwtToken.isExpiredRefreshToken(inputtedRefreshToken))
-                throw new RefreshTokenExpiredException("Refresh Token is expired.");
-            if (dbRefreshToken.isEmpty() || !(Objects.equals(dbRefreshToken, inputtedRefreshToken)))
-                throw new InCorrectRefreshTokenException("Inputted Refresh Token is not equal to DB's Refresh Token.");
-
-            TokenDTO newTokenDTO = jwtToken.create(userMapper.getUserById(id));
-            authMapper.updateRefreshTokenById(new UserIdAndTokenDTO(id, newTokenDTO.getRefreshToken()));
-
-            return newTokenDTO;
-            //토큰에러 처리하기
-            //JWTDecodeException
+            String dbRefreshToken = authMapper.getRefreshTokenById(userIdAndTokenDTO.getId());
+            if (dbRefreshToken.isEmpty() || !(Objects.equals(dbRefreshToken, userIdAndTokenDTO.getRefreshToken())))
+                throw new InCorrectRefreshTokenException(ExceptionMessage.INCORRECT_REFRESH_TOKEN.getMessage());
         }
         catch(NullPointerException nullPointerException) {
             //DB에 유저(토큰으로 인한)를 찾지 못한 경우
-            throw new UsernameNotFoundException("Token's User not found");
+            throw new UsernameNotFoundException(ExceptionMessage.TOKEN_USER_NOT_FOUND.getMessage());
         }
     }
 
+    @Override
+    public TokenDTO refreshToken(long id) {
+        TokenDTO newTokenDTO = jwtToken.create(userMapper.getUserById(id));
+        updateUserRefreshToken(new UserIdAndTokenDTO(id, newTokenDTO.getRefreshToken()));
+        return newTokenDTO;
+    }
 }

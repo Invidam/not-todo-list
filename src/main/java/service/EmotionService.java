@@ -1,12 +1,9 @@
 package service;
 
 
-import DTO.Emotion.EmotionWithUserDTO;
+import domain.EmotionRelation;
 
 public interface EmotionService {
-    void createEmotion(EmotionWithUserDTO emotionWithUserDTO);
-    void deleteEmotion(EmotionWithUserDTO emotionWithUserDTO);
+    void createEmotion(EmotionRelation emotionRelation);
+    void deleteEmotion(EmotionRelation emotionRelation);
 }
-
-//이모션 생성 삭제
-//이모션 전부 가져오기도 여기 해당할 수도 있음

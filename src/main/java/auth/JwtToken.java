@@ -1,7 +1,6 @@
 package auth;
 
 import DTO.Token.TokenDTO;
-import DTO.User.UserInfoDTO;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -90,20 +89,6 @@ public class JwtToken {
 
     }
 
-    public boolean isExpiredAccessToken(String accessToken) {
-        try {
-            DecodedJWT jwt = decodeToken(accessToken,accessSecretKey,accessTokenValidTime);
-            return jwt.getExpiresAt().before(new Date());
-        }
-        catch(TokenExpiredException exception) {
-            return true;
-        }
-        catch(JWTVerificationException exception){
-            exception.printStackTrace();
-            throw new JWTVerificationException("In Verify Token, Error appeared.",null);
-        }
-    }
-
     public boolean isExpiredRefreshToken(String refreshToken) {
         User user = new User();
         try {
@@ -119,31 +104,14 @@ public class JwtToken {
         }
     }
 
-
-    //ref 만료 확인
-        //create
-        //access 만료 확인
-            //재발급
-            //
-    //토큰이 유효하지 않으면교체해주는 함수
-    //엑세스 토큰이 리프레시 토큰과 같은 값을 가지는지 확인하는 함수
-    public long getIdInRefreshToken(String refreshToken) {
+    public long verifyRefreshToken(String refreshToken) {
         return Long.parseLong(decodeToken(refreshToken,refreshSecretKey,refreshTokenValidTime).getClaim("id").asString());
     }
-    public UserInfoDTO verify(String accessToken) {
-        UserInfoDTO userInfoDTO = new UserInfoDTO();
-        try {
-            DecodedJWT jwt = decodeToken(accessToken,accessSecretKey,accessTokenValidTime);
+    public long verifyAccessToken(String accessToken) {
 
-            userInfoDTO.setId(Long.parseLong(jwt.getClaim("id").asString()));
-            userInfoDTO.setNickname(jwt.getClaim("nickname").asString());
+        DecodedJWT jwt = decodeToken(accessToken,accessSecretKey,accessTokenValidTime);
 
-            return userInfoDTO;
-        }
-        catch(JWTVerificationException exception){
-            exception.printStackTrace();
-            throw new JWTVerificationException("In Verify Token, Error appeared.",null);
-        }
+        return Long.parseLong(jwt.getClaim("id").asString());
     }
 
 }

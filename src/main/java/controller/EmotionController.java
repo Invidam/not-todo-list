@@ -2,47 +2,48 @@ package controller;
 
 
 import DTO.Emotion.EmotionWithUserDTO;
-import DTO.Response.SuccessInfo;
-import DTO.User.UserInfoDTO;
 import auth.JwtToken;
+import enums.SuccessStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import service.EmotionService;
+import utility.DTOEntityMapper;
 
 @RestController
 @RequestMapping("/emotion")
 public class EmotionController {
 
     private final EmotionService emotionService;
-
-    @Autowired
     private final JwtToken jwtToken;
+    private final DTOEntityMapper dtoEntityMapper;
 
     @Autowired
-    public EmotionController(EmotionService emotionService, JwtToken jwtToken) {
+    public EmotionController(EmotionService emotionService, JwtToken jwtToken, DTOEntityMapper dtoEntityMapper) {
         this.emotionService = emotionService;
         this.jwtToken = jwtToken;
+        this.dtoEntityMapper = dtoEntityMapper;
     }
+
     void enrichEmotionWithUserDTO(EmotionWithUserDTO emotionWithUserDTO, String authHeader) {
-        UserInfoDTO userInfoDTO = jwtToken.verify(jwtToken.getAccessTokenInHeader(authHeader));
-        emotionWithUserDTO.setId(userInfoDTO.getId());
-        emotionWithUserDTO.setNickname(userInfoDTO.getNickname());
+        long userId = jwtToken.verifyAccessToken(jwtToken.getAccessTokenInHeader(authHeader));
+        emotionWithUserDTO.setUserId(userId);
     }
 
     @RequestMapping(value="", method = RequestMethod.POST)
-    public ResponseEntity<SuccessInfo> createEmotion(@RequestBody EmotionWithUserDTO emotionWithUserDTO, @RequestHeader(value = "Authorization") String authHeader) {
+    public ResponseEntity<SuccessStatus> createEmotion(@RequestBody EmotionWithUserDTO emotionWithUserDTO, @RequestHeader(value = "Authorization") String authHeader) {
         enrichEmotionWithUserDTO(emotionWithUserDTO,authHeader);
+        emotionService.createEmotion(dtoEntityMapper.toEntity(emotionWithUserDTO));
 
-        emotionService.createEmotion(emotionWithUserDTO);
-    return ResponseEntity.status(HttpStatus.CREATED).body(new SuccessInfo("CREATE_EMOTION_RELATION", "success at create  emotion relation."));
+        return ResponseEntity.status(HttpStatus.CREATED).body(SuccessStatus.CREATE_EMOTION_REL);
     }
 
     @RequestMapping(value="", method = RequestMethod.DELETE)
-    public ResponseEntity<SuccessInfo> deleteEmotion(@RequestBody EmotionWithUserDTO emotionWithUserDTO, @RequestHeader(value = "Authorization") String authHeader) {
+    public ResponseEntity<SuccessStatus> deleteEmotion(@RequestBody EmotionWithUserDTO emotionWithUserDTO, @RequestHeader(value = "Authorization") String authHeader) {
         enrichEmotionWithUserDTO(emotionWithUserDTO,authHeader);
-        emotionService.deleteEmotion(emotionWithUserDTO);
-        return ResponseEntity.ok(new SuccessInfo("DELETE_SUCCESS", "success at delete emotion relation."));
+        emotionService.deleteEmotion(dtoEntityMapper.toEntity(emotionWithUserDTO));
+
+        return ResponseEntity.ok(SuccessStatus.DELETE_EMOTION_REL);
     }
 }
