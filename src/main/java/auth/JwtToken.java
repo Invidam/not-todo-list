@@ -4,9 +4,6 @@ import DTO.Token.TokenDTO;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTCreationException;
-import com.auth0.jwt.exceptions.JWTDecodeException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import domain.User;
@@ -30,6 +27,7 @@ public class JwtToken {
     private final int accessTokenValidTime = 1000 * 60 * 30; // 30m
     private final int refreshTokenValidTime = 1000 * 60 * 60 * 24 * 14; // 14d
 
+    private final String ISSUER = "hspark";
     @Autowired
     public JwtToken(@Value("${jwt.accessSecretKey}") String accessSecretKey,@Value("${jwt.refreshSecretKey}") String refreshSecretKey) {
         this.accessSecretKey = accessSecretKey;
@@ -58,35 +56,21 @@ public class JwtToken {
         return payloadClaims;
     }
     public String createToken(User user, boolean isAccessToken) {
-        return JWT.create().withIssuer("hspark")
+        return JWT.create().withIssuer(ISSUER)
                 .withExpiresAt(new Date((new Date().getTime() + (isAccessToken ? accessTokenValidTime : refreshTokenValidTime))))
                 .withHeader(makeHeader())
                 .withPayload(makePayload(user,isAccessToken))
                 .sign(Algorithm.HMAC256(isAccessToken ? accessSecretKey : refreshSecretKey));
     }
     public TokenDTO create(User user) {
-        try {
-            return new TokenDTO(createToken(user,true), createToken(user,false));
-        }
-        catch(JWTCreationException exception) {
-            //클레임에 오류가 있을 경우
-            exception.printStackTrace();
-            throw new JWTCreationException("In Create Token, Error appeared.",null);
-        }
+        return new TokenDTO(createToken(user,true), createToken(user,false));
     }
     private DecodedJWT decodeToken(String token, String secretKey, int validTime) {
-        try {
-            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secretKey))
-                    .withIssuer("hspark")
-                    .build();
+        JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secretKey))
+                .withIssuer(ISSUER)
+                .build();
 
-            return verifier.verify(token);
-        }
-        catch(JWTDecodeException exception) {
-            exception.printStackTrace();
-            throw new JWTDecodeException("In Decode Token, Error appeared.",null);
-        }
-
+        return verifier.verify(token);
     }
 
     public boolean isExpiredRefreshToken(String refreshToken) {
@@ -97,10 +81,6 @@ public class JwtToken {
         }
         catch(TokenExpiredException exception) {
             return true;
-        }
-        catch(JWTVerificationException exception){
-            exception.printStackTrace();
-            throw new JWTVerificationException("In Verify Token, Error appeared.",null);
         }
     }
 
