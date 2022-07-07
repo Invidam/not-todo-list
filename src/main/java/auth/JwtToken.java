@@ -20,8 +20,6 @@ public class JwtToken {
 
 
     private final String accessSecretKey;
-
-
     private final String refreshSecretKey;
 
     private final int accessTokenValidTime = 1000 * 60 * 30; // 30m
@@ -74,7 +72,6 @@ public class JwtToken {
     }
 
     public boolean isExpiredRefreshToken(String refreshToken) {
-        User user = new User();
         try {
             DecodedJWT jwt = decodeToken(refreshToken,refreshSecretKey,refreshTokenValidTime);
             return jwt.getExpiresAt().before(new Date());
@@ -93,6 +90,5 @@ public class JwtToken {
 
         return Long.parseLong(jwt.getClaim("id").asString());
     }
-
 }
 
