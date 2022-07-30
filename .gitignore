@@ -4,3 +4,12 @@ src/main/resources/config.properties
 
 #JWT private
 src/main/resources/application.properties
+
+
+#Build
+target/**
+out/**
+
+
+#etc
+.idea/**

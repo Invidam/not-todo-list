@@ -4,7 +4,6 @@ import DTO.Token.TokenDTO;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,16 +68,6 @@ public class JwtToken {
                 .build();
 
         return verifier.verify(token);
-    }
-
-    public boolean isExpiredRefreshToken(String refreshToken) {
-        try {
-            DecodedJWT jwt = decodeToken(refreshToken,refreshSecretKey,refreshTokenValidTime);
-            return jwt.getExpiresAt().before(new Date());
-        }
-        catch(TokenExpiredException exception) {
-            return true;
-        }
     }
 
     public long verifyRefreshToken(String refreshToken) {
