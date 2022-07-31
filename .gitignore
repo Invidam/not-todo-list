@@ -1,15 +1,18 @@
 #db private
 src/main/resources/config.properties
-
+**/config.properties
 
 #JWT private
 src/main/resources/application.properties
 
 
+
 #Build
-target/**
-out/**
+target/
+out/
 
 
 #etc
 .idea/**
+.idea/
+classes/**
