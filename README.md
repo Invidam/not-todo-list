@@ -47,6 +47,91 @@
 
 # 프로젝트 설계
 
-[데이터베이스 설계](%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%84%8C%E1%85%A6%E1%86%A8%E1%84%90%E1%85%B3%20%E1%84%89%E1%85%A9%E1%84%80%E1%85%A2%20a2d389b87e864a93ab78c499851d88a9/%E1%84%83%E1%85%A6%E1%84%8B%E1%85%B5%E1%84%90%E1%85%A5%E1%84%87%E1%85%A6%E1%84%8B%E1%85%B5%E1%84%89%E1%85%B3%20%E1%84%89%E1%85%A5%E1%86%AF%E1%84%80%E1%85%A8%2089d2b93bf0b548e191a50b5e28b92315.md)
+[데이터베이스 설계]
+<details>
+<summary>데이터베이스 설계</summary>
+<div markdown="1">
 
-[기술 설명](%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%84%8C%E1%85%A6%E1%86%A8%E1%84%90%E1%85%B3%20%E1%84%89%E1%85%A9%E1%84%80%E1%85%A2%20a2d389b87e864a93ab78c499851d88a9/%E1%84%80%E1%85%B5%E1%84%89%E1%85%AE%E1%86%AF%20%E1%84%89%E1%85%A5%E1%86%AF%E1%84%86%E1%85%A7%E1%86%BC%201d504b580080480193b97eb257932634.md)
+    # 데이터베이스 설계
+
+![Untitled](%E1%84%83%E1%85%A6%E1%84%8B%E1%85%B5%E1%84%90%E1%85%A5%E1%84%87%E1%85%A6%E1%84%8B%E1%85%B5%E1%84%89%E1%85%B3%20%E1%84%89%E1%85%A5%E1%86%AF%E1%84%80%E1%85%A8%2089d2b93bf0b548e191a50b5e28b92315/Untitled.png)
+
+💜타
+
+1. 탈취
+2. 기존 사용자가 재갱신 (acc, ref)
+3. 
+
+## user
+
+| Column Name | Data Type | 연관 관계 |
+| --- | --- | --- |
+| id | INT |  |
+| account | VARCHAR(255) |  |
+| password | VARCHAR(255) |  |
+| nickname | VARCHAR(255) |  |
+| refresh_token | VARCHAR(255) |  |
+| created_at | DATETIME |  |
+| is_deleted | TINY INT |  |
+
+## item_emotion
+
+| Column Name | Data Type | 연관 관계 |
+| --- | --- | --- |
+| item_id | INT | item.id |
+| emotion_id | SMALLINT |  |
+| user_id | INT | user.id |
+
+## item
+
+| Column Name | Data Type | 연관 관계 |
+| --- | --- | --- |
+| id | INT |  |
+| user_id | VARCHAR(255) | user.id |
+| title | VARCHAR(255) |  |
+| priority | TINYINT |  |
+| created_at | DATETIME |  |
+| edited_at | DATETIME |  |
+| deadline | DATETIME |  |
+| description | TEXT |  |
+| is_done | TINYINT |  |
+| is_edited | TINYINT |  |
+| is_shared | TINYINT |  |
+| is_deleted | TINYINT |  |
+
+## hash_tag
+
+| Column Name | Data Type | 연관 관계 |
+| --- | --- | --- |
+| id | INT |  |
+| hash_tag_name | VARCHAR(255) |  |
+
+## item_hash_tag
+
+| Column Name | Data Type | 연관 관계 |
+| --- | --- | --- |
+| item_id | INT | item.id |
+| hash_tag_id | SMALLINT | hash_tag.id |
+
+</div>
+</details>
+
+[기술 설명]
+<details>
+<summary>기술 설명</summary>
+<div markdown="1">
+
+    # 기술 설명
+
+- Java
+    - JDK: `1.8`
+- Spring
+    - mvc: `4.3.18.RELEASE`
+    - secrurity: `5.7.1`
+- Mysql
+    - `8.0.28`
+- Mybatis
+    - `3.2.2`
+
+</div>
+</details>
