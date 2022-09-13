@@ -51,16 +51,9 @@
 <details>
 <summary>데이터베이스 설계</summary>
 <div markdown="1">
+    
+![db-image](https://user-images.githubusercontent.com/71889359/189872512-a8cac052-1bee-4eb5-ba62-97e09f832c4b.png)
 
-    # 데이터베이스 설계
-
-![Untitled](%E1%84%83%E1%85%A6%E1%84%8B%E1%85%B5%E1%84%90%E1%85%A5%E1%84%87%E1%85%A6%E1%84%8B%E1%85%B5%E1%84%89%E1%85%B3%20%E1%84%89%E1%85%A5%E1%86%AF%E1%84%80%E1%85%A8%2089d2b93bf0b548e191a50b5e28b92315/Untitled.png)
-
-💜타
-
-1. 탈취
-2. 기존 사용자가 재갱신 (acc, ref)
-3. 
 
 ## user
 
@@ -120,9 +113,7 @@
 <details>
 <summary>기술 설명</summary>
 <div markdown="1">
-
-    # 기술 설명
-
+    
 - Java
     - JDK: `1.8`
 - Spring
