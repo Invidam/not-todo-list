@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="war" name="build-not-todo-list">
-    <output-path>$PROJECT_DIR$/out/artifacts/build_not_todo_list</output-path>
-    <root id="archive" name="build-not-todo-list.war">
-      <element id="artifact" artifact-name="not-todo-list:war exploded" />
-    </root>
-  </artifact>
-</component>
