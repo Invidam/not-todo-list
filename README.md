@@ -2,9 +2,11 @@
 
 ## 프로젝트 명: NOT TO DO LIST ❎⭕
 
-### 깃헙주소: [https://github.com/Invidam/not-todo-list](https://github.com/Invidam/not-todo-list)
+### [깃헙주소](https://github.com/Invidam/not-todo-list)
 
-### API 문서: [https://documenter.getpostman.com/view/18176061/UzBsJjoU](https://documenter.getpostman.com/view/18176061/UzBsJjoU)
+### [API 문서](https://documenter.getpostman.com/view/18176061/UzBsJjoU)
+
+### [배포 절차 문서 (현재 동작은 정지 상태)](https://docs.google.com/document/d/1DOiMdKCctEovzAL8LmWczHT1_NSwunQbiH_fwKinYIs/edit?usp=sharing)
 
 ## 프로젝트 설명
 
